@@ -1,0 +1,78 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;height:100%;background:transparent;overflow:hidden;font-family:"SF Mono",Menlo,monospace;color:#ffcf8a}
+  #veil{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(0,20,30,.78) 0%,rgba(0,8,14,.9) 60%,rgba(0,0,0,.94) 100%);opacity:0;transition:opacity .6s}
+  canvas{position:fixed;inset:0;width:100vw;height:100vh}
+  #core{position:fixed;left:50%;top:50%;width:62vmin;height:62vmin;transform:translate(-50%,-50%) scale(.2);opacity:0;mix-blend-mode:screen;transition:transform 1.6s cubic-bezier(.2,.9,.2,1),opacity 1s;filter:saturate(1.1) brightness(1.15)}
+  #core.on{transform:translate(-50%,-50%) scale(1);opacity:1}
+  #lines{position:fixed;left:7vw;top:16vh;font-size:15px;letter-spacing:.22em;line-height:2.1em;text-shadow:0 0 12px #ff9a2e}
+  #lines div{opacity:0;transform:translateX(-14px);transition:all .35s}
+  #lines div.on{opacity:1;transform:none}
+  #title{position:fixed;top:79%;left:0;right:0;text-align:center;font-size:13px;letter-spacing:.8em;opacity:0;transition:opacity .8s;text-shadow:0 0 18px #ff9a2e}
+  #title b{display:block;font-size:56px;letter-spacing:.35em;font-weight:300;margin-top:10px;color:#fff0dc}
+  .corner{position:fixed;width:70px;height:70px;border:2px solid #ffb04a;opacity:.0;transition:opacity .6s}
+  .tl{top:4vh;left:4vw;border-right:0;border-bottom:0}.tr{top:4vh;right:4vw;border-left:0;border-bottom:0}
+  .bl{bottom:4vh;left:4vw;border-right:0;border-top:0}.br{bottom:4vh;right:4vw;border-left:0;border-top:0}
+  #scan{position:fixed;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ffb04a,transparent);box-shadow:0 0 22px #ffb04a;top:-4px;opacity:.8}
+  #stats{position:fixed;right:7vw;top:16vh;font-size:12px;letter-spacing:.2em;text-align:right;line-height:2em;opacity:0;transition:opacity .8s}
+  .bar{display:inline-block;width:120px;height:4px;background:rgba(255,176,74,.18);margin-left:10px;vertical-align:middle}
+  .bar i{display:block;height:100%;width:0;background:#ffb04a;box-shadow:0 0 10px #ffb04a;transition:width 1.6s ease-out}
+  body.out #veil,body.out #core,body.out canvas,body.out #lines,body.out #title,body.out .corner,body.out #stats{opacity:0!important;transition:opacity 1.2s}
+</style></head>
+<body>
+<div id="veil"></div><video id="core" src="core_boot.mp4" muted autoplay loop playsinline></video><canvas id="c"></canvas><div id="scan"></div>
+<div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div id="title">ALL SYSTEMS<b>Alfred</b></div>
+<div id="stats">
+  <div>NEURAL LINK <span class="bar"><i data-w="100"></i></span></div>
+  <div>VOICE MATRIX <span class="bar"><i data-w="92"></i></span></div>
+  <div>HOLO PROJECTOR <span class="bar"><i data-w="86"></i></span></div>
+  <div>WORKSTATION <span class="bar"><i data-w="100"></i></span></div>
+</div>
+<div id="lines"></div>
+<script>
+const P=new URLSearchParams(location.search);
+let lines=[];try{lines=JSON.parse(P.get("lines")||"[]")}catch(e){}
+if(!lines.length)lines=["Alfred ONLINE","WELCOME HOME","VOICE ✓  BRAIN ✓  HOLOGRAM ✓"];
+const SECS=parseFloat(P.get("secs")||"11");
+if(P.get("still")){const st=document.createElement("style");st.textContent="*{transition:none!important}";document.head.appendChild(st);}
+const c=document.getElementById("c"),x=c.getContext("2d");
+let W,H;function rs(){W=c.width=innerWidth*devicePixelRatio;H=c.height=innerHeight*devicePixelRatio}rs();addEventListener("resize",rs);
+const t0=performance.now();
+function ring(r,w,a0,len,alpha,dash){x.beginPath();x.setLineDash(dash||[]);x.lineWidth=w;x.strokeStyle=`rgba(255,176,74,${alpha})`;x.arc(W/2,H/2,r,a0,a0+len);x.stroke();x.setLineDash([])}
+function ticks(r,n,len,rot,alpha){x.strokeStyle=`rgba(255,204,130,${alpha})`;x.lineWidth=1.5*devicePixelRatio;for(let i=0;i<n;i++){const a=rot+i*Math.PI*2/n;x.beginPath();x.moveTo(W/2+Math.cos(a)*r,H/2+Math.sin(a)*r);x.lineTo(W/2+Math.cos(a)*(r+len),H/2+Math.sin(a)*(r+len));x.stroke()}}
+function frame(now){
+  const t=(now-t0)/1000,k=devicePixelRatio,S=Math.min(W,H);
+  x.clearRect(0,0,W,H);
+  const grow=Math.min(1,t/1.6),e=1-Math.pow(1-grow,3);
+  // core glow
+  const g=x.createRadialGradient(W/2,H/2,0,W/2,H/2,S*.12*e+1);g.addColorStop(0,"rgba(255,240,215,.95)");g.addColorStop(.25,"rgba(255,176,74,.55)");g.addColorStop(1,"rgba(255,176,74,0)");
+  x.fillStyle=g;x.beginPath();x.arc(W/2,H/2,S*.12*e+1,0,7);x.fill();
+  ring(S*.07*e,3*k,0,Math.PI*2,.9);
+  ring(S*.14*e,2*k,t*1.2,Math.PI*1.4,.75);
+  ring(S*.17*e,8*k,-t*.7,Math.PI*.5,.5);
+  ring(S*.17*e,8*k,-t*.7+Math.PI,Math.PI*.5,.5);
+  ticks(S*.2*e,72,10*k,t*.25,.55);
+  ring(S*.24*e,1.5*k,0,Math.PI*2,.35,[4*k,10*k]);
+  ring(S*.28*e,3*k,t*.4,Math.PI*1.75,.4);
+  ticks(S*.31*e,24,18*k,-t*.15,.35);
+  ring(S*.36*e,1*k,-t*.2,Math.PI*2,.18,[30*k,14*k]);
+  // radar sweep
+  const sw=t*2.2;x.fillStyle="rgba(255,176,74,.08)";x.beginPath();x.moveTo(W/2,H/2);x.arc(W/2,H/2,S*.36*e,sw,sw+.5);x.fill();
+  // hex dust
+  for(let i=0;i<40;i++){const a=i*2.4+t*.05,r=S*(.4+.08*Math.sin(i*7.1+t));x.fillStyle=`rgba(255,204,130,${.15+.15*Math.sin(t*2+i)})`;x.fillRect(W/2+Math.cos(a)*r,H/2+Math.sin(a)*r*.6,2*k,2*k)}
+  if(t<SECS+2)requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+const $=s=>document.querySelector(s);
+setTimeout(()=>{const cv=$("#core");cv.play&&cv.play().catch(()=>{});cv.classList.add("on")},250);
+if(P.get("still")){const cv=document.getElementById("core");cv.classList.add("on")}
+setTimeout(()=>{$("#veil").style.opacity=1;document.querySelectorAll(".corner").forEach(c=>c.style.opacity=.9)},50);
+const scan=$("#scan");let sy=0;const si=setInterval(()=>{sy+=innerHeight/60;scan.style.top=sy+"px";if(sy>innerHeight){clearInterval(si);scan.style.display="none"}},16);
+setTimeout(()=>{$("#title").style.opacity=1},1400);
+setTimeout(()=>{$("#stats").style.opacity=1;document.querySelectorAll(".bar i").forEach(b=>b.style.width=b.dataset.w+"%")},2000);
+const box=$("#lines");lines.forEach((l,i)=>{const d=document.createElement("div");d.textContent="▸ "+l;box.appendChild(d);setTimeout(()=>d.classList.add("on"),2300+i*650)});
+setTimeout(()=>document.body.classList.add("out"),SECS*1000);
+</script>
+</body></html>

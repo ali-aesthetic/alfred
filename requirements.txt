@@ -1,0 +1,17 @@
+# Core (pinned so a friend's Mac gets exactly what was tested). Heavy extras install on first use:
+#   mediapipe (camera, on "look at me") · rembg (photo holograms) · piper-tts (only if tts_ru_engine = piper)
+numpy==2.4.6
+sounddevice==0.5.6
+edge-tts==7.3.1
+openwakeword==0.6.0
+onnxruntime==1.31.1
+huggingface_hub==2.4.0
+rumps==0.4.0
+pyobjc-framework-WebKit==13.0
+pyobjc-framework-AVFoundation==13.0
+kokoro-onnx==0.6.1
+soundfile==0.14.0
+num2words==0.5.14
+mlx-whisper==0.4.3
+opencv-python-headless==5.0.0.93
+Pillow==13.0.0

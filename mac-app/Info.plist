@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key><string>com.alfred.app</string>
+	<key>CFBundleName</key><string>Alfred</string>
+	<key>CFBundleDisplayName</key><string>Alfred</string>
+	<key>CFBundleExecutable</key><string>Alfred</string>
+	<key>CFBundlePackageType</key><string>APPL</string>
+	<key>CFBundleShortVersionString</key><string>0.1</string>
+	<key>CFBundleVersion</key><string>1</string>
+	<key>CFBundleIconFile</key><string>AppIcon</string>
+	<key>LSMinimumSystemVersion</key><string>14.0</string>
+	<key>NSHighResolutionCapable</key><true/>
+	<key>NSMicrophoneUsageDescription</key><string>Alfred listens through the microphone so you can talk to it.</string>
+	<key>NSSpeechRecognitionUsageDescription</key><string>Alfred turns your voice into text so it understands what you say.</string>
+	<key>NSCameraUsageDescription</key><string>Alfred can look through the camera when you ask it to see something.</string>
+	<key>NSAppleEventsUsageDescription</key><string>Alfred controls other apps on your Mac when you ask it to.</string>
+</dict>
+</plist>

@@ -1,0 +1,116 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alfred</title><style>
+:root{--amber:#ffb04a;--text:#f5efe6;--dim:#97918a;--faint:#5d5953;--line:rgba(255,255,255,.08);--glass:rgba(28,26,24,.72);--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:#0b0a09;color:var(--text);font:15px/1.5 -apple-system,"SF Pro Text","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;user-select:none;-webkit-user-select:none}
+body.native{background:rgba(6,5,4,.38)}
+.drag{position:fixed;top:0;left:0;right:0;height:38px;-webkit-app-region:drag}
+/* layout: one calm column */
+.stage{height:100%;display:flex;flex-direction:column;align-items:center;padding-top:34px}
+.hero{flex:none;display:flex;flex-direction:column;align-items:center;transition:all .6s var(--ease)}
+.core{position:relative;width:200px;height:200px;border-radius:50%;overflow:hidden;transition:all .6s var(--ease);-webkit-mask-image:radial-gradient(circle,#000 58%,transparent 71%);mask-image:radial-gradient(circle,#000 58%,transparent 71%)}
+.core video{width:100%;height:100%;object-fit:cover;mix-blend-mode:screen;transform:scale(1.25);transition:filter .6s}
+body[data-s=offline] .core video{filter:grayscale(1) brightness(.35)}
+body[data-s=thinking] .core{transform:scale(1.04)}
+.state{margin-top:2px;font-size:13px;font-weight:500;letter-spacing:.02em;color:var(--dim);height:20px;transition:color .4s}
+body[data-s=listening] .state,body[data-s=speaking] .state{color:var(--amber)}
+body[data-s=thinking] .state{background:linear-gradient(90deg,var(--dim) 30%,#fff 50%,var(--dim) 70%);background-size:200% 100%;-webkit-background-clip:text;color:transparent;animation:sh 1.6s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.startbtn{display:none;margin-top:10px;background:var(--amber);color:#1a1000;border:0;border-radius:18px;padding:8px 22px;font:600 14px -apple-system,sans-serif;cursor:pointer}
+body[data-s=offline] .startbtn{display:block}
+.has .core{width:124px;height:124px}
+/* transcript */
+.feed{flex:1;width:100%;max-width:620px;overflow-y:auto;padding:14px 28px 8px;display:flex;flex-direction:column;gap:20px;
+ -webkit-mask-image:linear-gradient(transparent 0,#000 56px);mask-image:linear-gradient(transparent 0,#000 56px);scrollbar-width:none;user-select:text;-webkit-user-select:text}
+.feed::-webkit-scrollbar{display:none}
+.turn{display:flex;flex-direction:column;gap:5px;animation:in .5s var(--ease)}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.you{font-size:13px;color:var(--dim)}
+.jar{font-size:17px;line-height:1.5;color:var(--text);white-space:pre-line}
+.act{font:11.5px ui-monospace,"SF Mono",Menlo,monospace;color:var(--faint)}
+.err{font-size:12.5px;color:#ff8f7a}
+table{border-collapse:collapse;margin:8px 0 2px;font-size:14px}th,td{padding:5px 22px 5px 0;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--dim);font-weight:500;font-size:12px}
+code{font:13px ui-monospace,Menlo,monospace;color:#ffd9a3}
+.hint{margin:auto;text-align:center;color:var(--dim);font-size:14px;line-height:1.7}
+.hint b{color:var(--text);font-weight:500}
+/* command bar */
+.bar{flex:none;width:100%;max-width:620px;padding:10px 24px 22px}
+.pill{display:flex;align-items:center;gap:8px;height:50px;padding:0 7px 0 20px;border-radius:25px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(30px) saturate(1.4);-webkit-backdrop-filter:blur(30px) saturate(1.4);box-shadow:0 10px 34px rgba(0,0,0,.35);transition:border-color .25s,box-shadow .25s}
+.pill:focus-within{border-color:rgba(255,176,74,.5);box-shadow:0 10px 34px rgba(0,0,0,.35),0 0 0 4px rgba(255,176,74,.1)}
+input{flex:1;background:none;border:0;outline:0;color:var(--text);font:16px -apple-system,sans-serif;user-select:text;-webkit-user-select:text}
+input::placeholder{color:var(--faint)}
+.go{width:36px;height:36px;border-radius:50%;border:0;background:var(--amber);color:#1a1000;display:grid;place-items:center;cursor:pointer;opacity:.25;transition:opacity .2s,transform .2s}
+.has-text .go{opacity:1}.go:active{transform:scale(.92)}
+.go svg{width:17px;height:17px}
+/* top-right controls */
+.icons{position:fixed;top:9px;right:14px;display:flex;gap:2px;z-index:5}
+.ib{width:30px;height:30px;border-radius:8px;border:0;background:none;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:.2s}
+.ib:hover{background:rgba(255,255,255,.08);color:var(--text)}.ib svg{width:17px;height:17px}
+/* side sheet */
+.sheet{position:fixed;top:0;right:0;bottom:0;width:300px;padding:52px 22px 22px;background:var(--glass);backdrop-filter:blur(40px) saturate(1.5);-webkit-backdrop-filter:blur(40px) saturate(1.5);border-left:1px solid var(--line);transform:translateX(102%);transition:transform .45s var(--ease);z-index:4;overflow-y:auto}
+.open .sheet{transform:none}
+.scrim{position:fixed;inset:0;z-index:3;display:none}.open .scrim{display:block}
+h3{margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+.sec{margin-bottom:26px}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 2px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:color .2s}
+.row:hover{color:var(--amber)}.row svg{width:18px;height:18px;color:var(--dim);flex:none}.row:hover svg{color:var(--amber)}
+.row.ok{color:#8fe3a8}
+.kv{display:flex;justify-content:space-between;padding:7px 2px;font-size:13px;color:var(--dim)}.kv b{color:var(--text);font-weight:500}
+.sw{width:44px;height:26px;border-radius:13px;background:rgba(255,255,255,.14);position:relative;cursor:pointer;transition:background .25s;flex:none;margin-left:auto}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.4);transition:transform .25s var(--ease)}
+.sw.on{background:var(--amber)}.sw.on::after{transform:translateX(18px)}
+.note{font-size:11.5px;color:var(--faint);margin-top:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body data-s="offline"><div class="drag"></div>
+<div class="icons"><button class="ib" id="menu" aria-label="Controls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button></div>
+<div class="scrim" id="scrim"></div>
+<aside class="sheet"><div class="sec"><h3>Do</h3>
+<button class="row" data-a="restart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>Restart Alfred</button>
+<button class="row" data-a="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Microphone on / off</button>
+<button class="row" data-a="stop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>Stop Alfred</button>
+<button class="row" data-a="wake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>Wake-up protocol</button>
+<button class="row" data-a="focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>Focus mode</button>
+<button class="row" data-a="diag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Diagnostics</button>
+<button class="row" data-a="brain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>Open Obsidian brain</button>
+<button class="row" data-a="grow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 14c0-3-2-5-6-5 0 3 2 5 6 5z"/></svg>Learn from today</button>
+<button class="row" data-a="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/></svg>Full log</button></div>
+<div class="sec"><h3>Settings</h3><div id="tg"></div><div class="note">Camera and hologram apply after Alfred restarts.</div></div>
+<div class="sec"><h3>Status</h3><div id="kv"></div></div></aside>
+
+<div class="stage" id="stage"><div class="hero"><div class="core"><video id="v" src="/core.mp4" autoplay loop muted playsinline></video></div><div class="state" id="st"></div><button class="startbtn" id="startbtn">Start Alfred</button></div>
+<div class="feed" id="feed"></div>
+<form class="bar" id="f"><div class="pill"><input id="in" placeholder="Ask Alfred" autocomplete="off" autofocus><button class="go" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></form></div>
+<script>
+const $=id=>document.getElementById(id);const feed=$("feed");let sig="",stick=true;
+if(location.search.includes("native"))document.body.classList.add("native");
+feed.onscroll=()=>stick=feed.scrollTop+feed.clientHeight>feed.scrollHeight-40;
+const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function md(t){const L=esc(t).split("\n"),o=[];let i=0;const T=/^\s*\|.*\|\s*$/;
+ while(i<L.length){if(T.test(L[i])){const r=[];while(i<L.length&&T.test(L[i])){if(!/^\s*\|[\s:|-]+\|\s*$/.test(L[i]))r.push(L[i].trim().slice(1,-1).split("|").map(x=>x.trim()));i++}
+  o.push("<table>"+r.map((x,j)=>"<tr>"+x.map(c=>j?"<td>"+c+"</td>":"<th>"+c+"</th>").join("")+"</tr>").join("")+"</table>")}else o.push(L[i++])}
+ return o.join("\n").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`([^`]+)`/g,"<code>$1</code>")}
+async function post(p,b){try{return await(await fetch(p,{method:"POST",body:JSON.stringify(b)})).json()}catch(e){return{ok:false}}}
+const LABEL={idle:"Ready",listening:"Listening",thinking:"Thinking",speaking:"Speaking",paused:"Microphone off",starting:"Starting",offline:"Alfred is off"};
+function render(m){return m.k==="you"?`<div class="turn"><div class="you">${md(m.t)}</div></div>`:m.k==="alfred"?`<div class="turn"><div class="jar">${md(m.t)}</div></div>`:`<div class="${m.k}">${md(m.t)}</div>`}
+async function tick(){let s;try{s=await(await fetch("/api/state")).json()}catch(e){return}
+ document.body.dataset.s=s.status;$("st").textContent=LABEL[s.status]||s.status;
+ $("v").playbackRate=s.status==="thinking"?1.8:s.status==="speaking"?1.4:1;
+ const t=s.toggles;
+ $("tg").innerHTML=Object.entries(t).map(([k,v])=>`<div class="row" style="cursor:default"><span>${v.label}</span><div class="sw ${v.on?"on":""}" data-k="${k}" role="switch" aria-checked="${v.on}"></div></div>`).join("");
+ $("kv").innerHTML=[["Microphone",s.mic?"on":"off"],["Camera",t.camera.on?"on":"off"],["Brain",s.brain+" · "+s.model],["Power",s.battery?s.battery.pct+"%"+(s.battery.charging?" charging":""):"–"]].map(([a,b])=>`<div class="kv">${a}<b>${b}</b></div>`).join("");
+ const n=JSON.stringify(s.feed.slice(-8));
+ if(n!==sig){sig=n;document.getElementById("stage").classList.toggle("has",s.feed.length>0);
+  feed.innerHTML=s.feed.length?s.feed.map(render).join(""):'<div class="hint">Say <b>“Alfred”</b><br>or type below.</div>';
+  if(stick)feed.scrollTop=feed.scrollHeight}}
+$("f").onsubmit=async e=>{e.preventDefault();const v=$("in").value.trim();if(!v)return;$("in").value="";$("f").classList.remove("has-text");
+ stage.classList.add("has");const h=feed.querySelector(".hint");if(h)h.remove();
+ feed.insertAdjacentHTML("beforeend",`<div class="turn"><div class="you">${esc(v)}</div></div>`);feed.scrollTop=feed.scrollHeight;await post("/api/say",{text:v})};
+$("in").oninput=e=>$("f").classList.toggle("has-text",!!e.target.value.trim());
+$("startbtn").onclick=async()=>{await post("/api/action",{name:"start"});$("st").textContent="Starting…"};
+const sheet=()=>document.body.classList.toggle("open");$("menu").onclick=sheet;$("scrim").onclick=sheet;
+addEventListener("keydown",e=>{if(e.key==="Escape")document.body.classList.remove("open")});
+document.querySelector(".sheet").onclick=async e=>{const b=e.target.closest("[data-a]");if(b){await post("/api/action",{name:b.dataset.a});b.classList.add("ok");setTimeout(()=>b.classList.remove("ok"),1200);tick();return}
+ const s=e.target.closest(".sw");if(s){await post("/api/config",{key:s.dataset.k,value:!s.classList.contains("on")});tick()}};
+tick();setInterval(tick,1200);
+</script></body></html>

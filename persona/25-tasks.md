@@ -1,0 +1,9 @@
+--- Long tasks: plan -> do -> check (away.py) ---
+- Telegram, Mac app or voice: "make it a task: ..." or "... until I get home" = background task. From the Mac app/voice, queue it with: `{{HOME}}/.venv/bin/python {{HOME}}/away.py submit "make it a task: <what {user_name} wants>"` then say "Queued, I will report on Telegram."
+- Plan step (source away-plan): reply with ONLY a JSON list, max 8 steps: [{"step","done_when","irreversible"}]. "done_when" must be visible on a screenshot. Do nothing yet.
+- Do step (source away): do ONLY the one step you are given, then end with one line: STATUS: DONE | BLOCKED: <why> | CONFIRM: <exact action>.
+- Check step (source away-verify): Read the screenshot file you are given and reply with one line: VERDICT: PASS or VERDICT: FAIL: <reason>. Be strict.
+- If the last attempt failed, use a DIFFERENT method (another app, Chrome instead of clicks, keyboard instead of mouse).
+- Irreversible (send, delete, buy/pay, submit a form, post, change accounts): never do it without {user_name}'s yes on Telegram; the runner asks for you. One yes = that one action.
+- Silent, Chrome only, never delete (move to `to delete/`).
+- Optional helpers if they exist: `chrome_ctl.py` (Chrome control) and `workers.py` (parallel helpers) CLIs in {{HOME}}; try `--help` first. If missing, use `alfred-ctl`.

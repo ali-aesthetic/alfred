@@ -1,0 +1,18 @@
+{
+  "_about": "Optional Russian + Uzbek language pack. Apply with: python apply_language_pack.py ru",
+  "stt_language": null,
+  "stt_allowed": [
+    "en",
+    "ru",
+    "uz"
+  ],
+  "voice_ru": "ru-RU-DmitryNeural",
+  "voice_uz": "uz-UZ-SardorNeural",
+  "wake_words_fallback": [
+    "alfred",
+    "alfred,",
+    "альфред",
+    "алфред",
+    "олфред"
+  ]
+}

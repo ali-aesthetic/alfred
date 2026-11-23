@@ -1,0 +1,12 @@
+#!/bin/bash
+# alfred-timer SECONDS "text" — Alfred speaks the text after SECONDS (0 = now).
+# It only writes a note to data/timers.jsonl; Alfred's main program speaks it when due (works inside the sandbox).
+source "$(cd "$(dirname "$0")/.." && pwd)/env.sh"
+S="${1:-60}"; shift
+"$J/.venv/bin/python" - "$S" "$*" <<'PY'
+import json, os, sys, time
+s, text = float(sys.argv[1]), sys.argv[2]
+with open(os.path.join(os.environ["ALFRED_HOME"], "data", "timers.jsonl"), "a", encoding="utf-8") as f:
+    f.write(json.dumps({"at": time.time() + s, "text": text}, ensure_ascii=False) + "\n")
+print(f"Timer set: {int(s)} s")
+PY

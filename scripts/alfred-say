@@ -1,0 +1,4 @@
+#!/bin/bash
+# alfred-say "text" — Alfred says the text out loud.
+source "$(cd "$(dirname "$0")/.." && pwd)/env.sh"
+exec "$J/.venv/bin/python" "$J/say_cli.py" "$@"

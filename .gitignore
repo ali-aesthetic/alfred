@@ -1,0 +1,96 @@
+# Alfred — .gitignore
+# Rule of thumb: if it was made on a user's Mac while using the app, it must not ship.
+
+# ── 1. Personal data & secrets (NEVER ship) ──────────────────────────
+data/
+/data
+**/telegram_bot_token
+**/telegram_owner.json
+**/telegram_pair.json
+**/gemini_key
+**/phone_tokens.json
+**/chats.db*
+**/*.key
+**/*.pem
+**/*.p12
+**/*.cer
+**/*.mobileprovision
+.env
+.env.*
+*.secret
+to delete/
+
+# ── 2. Runtimes & caches (rebuilt by install.sh) ─────────────────────
+.venv/
+python/
+bin/
+.uv-cache/
+.npm-cache/
+.cache/
+__pycache__/
+*.pyc
+node_modules/
+
+# ── 3. Models (5.6 GB — downloaded by install.sh, never committed) ───
+models/
+*.onnx
+*.bin
+*.safetensors
+*.gguf
+*.mlx
+*.npz
+
+# ── 4. Build output & built apps ─────────────────────────────────────
+mac-app/.build/
+mac-app/build/
+*.app/
+Jarvis.app/
+"Jarvis Console.app/"
+*.dmg
+dist/
+*.pkg
+*.zip
+
+# ── 5. Heavy / old / personal working files ──────────────────────────
+*_original.*
+voice_v03_hark.py
+preview_*.json
+preview_*.html
+core_boot.mp4
+core_loop_*.mp4
+console-screenshot.jpg
+robot.html
+three.min.js
+GLTFLoader.js
+DRACOLoader.js
+draco/
+
+# ── 6. Internal notes & Ali-only launchers (replace with templates) ──
+CLAUDE.md
+FOR_YOUR_CLAUDE.md
+MOVED.md
+OVERNIGHT-REPORT.md
+SILENT-MODE-PLAN.md
+.claude/
+persona/00-ali-rules.md
+"Установить Джарвиса.command"
+"Set Gemini key.command"
+"Set Telegram bot.command"
+"Pair iPhone.command"
+"Sign in to Claude.command"
+"Start Jarvis.command"
+"Stop Jarvis.command"
+mac-app/CONTRACT.md
+mac-app/IVA-NOTES.md
+mac-app/HERMES-NOTES.md
+mac-app/DESIGN-RULES.md
+mac-app/TEST-RESULTS.md
+
+# ── 7. macOS / editor noise ──────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.wav
+*.lock
+* [0-9].*
